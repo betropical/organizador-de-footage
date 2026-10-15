@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- .NET Framework 4.8 viene incluido en Windows 10 (1903+) y 11: el .exe anda sin instalar nada. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>OrganizadorFootage</AssemblyName>
+    <RootNamespace>OrganizadorFootage</RootNamespace>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>2.1.0</Version>
+    <Product>Organizador de Footage</Product>
+    <AssemblyTitle>Organizador de Footage</AssemblyTitle>
+    <Company>@betoviedo</Company>
+    <Copyright>@betoviedo</Copyright>
+    <Description>Separa clips de video en verticales y horizontales</Description>
+    <Deterministic>true</Deterministic>
+    <DebugType>none</DebugType>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <!-- Permite compilar también desde Mac / Linux -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

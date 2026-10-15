@@ -1,0 +1,27 @@
+# Lista blanca: se ignora TODO salvo lo que se nombra abajo.
+# Así nunca se sube por error algo privado (ej: subir.sh con datos del FTP).
+*
+!.gitignore
+!README.md
+!LICENSE
+!build.sh
+!organizar.sh
+!App/
+!App/OrganizadorFootage.swift
+!App/AppIcon.icns
+!App/LEEME - Cómo abrir la app.txt
+!web/
+!web/index.html
+!.github/
+!.github/workflows/
+!.github/workflows/windows.yml
+!windows/
+!windows/Program.cs
+!windows/Mp4Info.cs
+!windows/OrganizadorFootage.csproj
+!windows/app.manifest
+!windows/AppIcon.ico
+!windows/LEEME - Windows.txt
+!docs/
+!docs/captura-windows.png
+!docs/captura-mac.png

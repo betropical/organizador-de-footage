@@ -1,0 +1,20 @@
+ORGANIZADOR DE FOOTAGE (Windows) — @betoviedo
+Separa tus clips en Verticales / Horizontales (y cámara lenta).
+
+CÓMO ABRIRLA
+1. Descomprimí el ZIP (clic derecho → Extraer todo).
+2. Doble clic en OrganizadorFootage.exe. No hace falta instalar nada.
+3. La primera vez Windows puede mostrar "Windows protegió tu PC".
+   Tocá "Más información" y después "Ejecutar de todas formas".
+   Aparece porque la app no está firmada con un certificado pago.
+   El código completo es público: https://github.com/betropical/organizador-de-footage
+
+CÓMO SE USA
+1. Arrastrá a la ventana la carpeta con tus clips (o la tarjeta entera).
+2. Elegí Mover o Copiar, y si querés activá slow motion y prefijos.
+3. Elegí dónde guardarlos (por defecto, en la misma carpeta),
+   revisá la lista y tocá el botón.
+Doble clic en un clip para cambiar su orientación a mano.
+
+Requiere Windows 10 u 11.
+¿Te ahorró tiempo? https://cafecito.app/beto_oviedo

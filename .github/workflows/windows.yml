@@ -1,0 +1,114 @@
+# Compila la app de Windows en una PC con Windows de GitHub, la prueba con
+# clips generados y deja el ZIP (y una captura de pantalla) como artefacto.
+name: Windows
+
+on:
+  push:
+    paths: ["windows/**", ".github/workflows/windows.yml"]
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compilar
+        run: dotnet build windows/OrganizadorFootage.csproj -c Release
+
+      - name: Armar ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out | Out-Null
+          Copy-Item windows/bin/Release/net48/OrganizadorFootage.exe out/
+          Copy-Item windows/bin/Release/net48/OrganizadorFootage.exe.config out/
+          Copy-Item "windows/LEEME - Windows.txt" out/
+          Compress-Archive -Path out/* -DestinationPath OrganizadorFootage-Windows.zip -Force
+
+      - name: Generar clips de prueba
+        shell: pwsh
+        run: |
+          choco install ffmpeg -y --no-progress | Out-Null
+          $env:Path += ";C:\ProgramData\chocolatey\bin"
+          $d = "$env:RUNNER_TEMP\clips\PRIVATE\M4ROOT\CLIP"
+          New-Item -ItemType Directory -Force $d | Out-Null
+          function clip($out, $rot, $fps) {
+            ffmpeg -loglevel error -y -f lavfi -i "testsrc=size=640x360:rate=${fps}:duration=1" -pix_fmt yuv420p "$env:RUNNER_TEMP\t.mp4"
+            ffmpeg -loglevel error -y -display_rotation $rot -i "$env:RUNNER_TEMP\t.mp4" -c copy $out
+          }
+          clip "$d\C0001.MP4" 0 25
+          clip "$d\C0002.MP4" 90 25
+          clip "$d\C0003.MP4" -90 120
+          clip "$d\C0004.MP4" 0 59.94
+          1..4 | ForEach-Object { Set-Content "$d\C000${_}M01.XML" "<xml/>" }
+          New-Item -ItemType Directory -Force "$env:RUNNER_TEMP\clips\tarjeta2" | Out-Null
+          clip "$env:RUNNER_TEMP\clips\tarjeta2\C0002.MP4" 90 25
+
+      - name: Probar la app (vista previa, Mover y Deshacer)
+        shell: powershell
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing, UIAutomationClient, UIAutomationTypes
+          $clips = "$env:RUNNER_TEMP\clips"
+          function captura($nombre) {
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("$nombre.png")
+          }
+          function listado { Get-ChildItem $clips -Recurse -File | ForEach-Object { $_.FullName.Substring($clips.Length) } | Sort-Object }
+          Add-Type -Namespace W -Name U -MemberDefinition '[DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h, int m, IntPtr w, IntPtr l);'
+          function boton($ventana, $texto) {
+            foreach ($b in $ventana.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)) {
+              if ($b.Current.ClassName -like "*BUTTON*" -and $b.Current.Name -like "*$texto*" -and $b.Current.IsEnabled) { return $b }
+            }
+            throw "No encontre el boton '$texto'"
+          }
+          # BM_CLICK: el mismo clic que hace el mouse
+          function tocar($b) { [W.U]::SendMessage([IntPtr]$b.Current.NativeWindowHandle, 0x00F5, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null }
+
+          $antes = listado
+          $p = Start-Process out/OrganizadorFootage.exe -ArgumentList "`"$clips`"" -PassThru
+          Start-Sleep -Seconds 8
+          if ($p.HasExited) { throw "La app se cerro sola (codigo $($p.ExitCode))" }
+          captura "1-vista-previa"
+          $AE = [System.Windows.Automation.AutomationElement]
+          $porNombre = New-Object System.Windows.Automation.PropertyCondition($AE::NameProperty, "Organizador de Footage")
+          $ventana = $AE::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Children, $porNombre)
+          if (-not $ventana) { throw "No encontre la ventana de la app" }
+
+          tocar (boton $ventana "Mover 5")
+          Start-Sleep -Seconds 4
+          captura "2-despues-de-mover"
+          $movido = listado
+          Write-Host "Despues de mover:"; $movido | Write-Host
+          if (-not ($movido -like "\Verticales\*")) { throw "No se creo la carpeta Verticales" }
+          if ($movido -like "\PRIVATE\*.MP4") { throw "Quedaron clips sin mover" }
+
+          tocar (boton $ventana "Deshacer")
+          Start-Sleep -Seconds 4
+          captura "3-despues-de-deshacer"
+          $despues = listado
+          Write-Host "Despues de deshacer:"; $despues | Write-Host
+          if (Compare-Object $antes $despues) { throw "Deshacer no dejo todo como estaba" }
+          if (Test-Path "$clips\Verticales") { throw "Quedo la carpeta Verticales" }
+          Write-Host "OK: Mover y Deshacer funcionan"
+          Stop-Process -Id $p.Id
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: OrganizadorFootage-Windows
+          path: |
+            OrganizadorFootage-Windows.zip
+            *.png
+
+      - name: Adjuntar a la versión publicada
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" OrganizadorFootage-Windows.zip --clobber

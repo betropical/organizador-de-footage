@@ -1,0 +1,22 @@
+ORGANIZADOR DE FOOTAGE — @betoviedo
+Separa tus clips en Verticales / Horizontales (y cámara lenta).
+
+CÓMO INSTALARLA
+1. Arrastrá "Organizador de Footage" a la carpeta Aplicaciones.
+2. Abrila con doble clic. La primera vez la Mac muestra un aviso
+   porque la app no viene de la App Store. Tocá "Listo".
+3. Abrí Ajustes del Sistema (el engranaje), entrá en
+   Privacidad y seguridad, bajá hasta el final y tocá
+   "Abrir igualmente".
+4. ¡Listo! De ahora en más se abre normal.
+
+¿Mac más vieja (macOS 14 o anterior)? Clic derecho sobre la app → Abrir → Abrir.
+
+CÓMO SE USA
+1. Arrastrá a la ventana la carpeta con tus clips (o la tarjeta entera).
+2. Elegí Mover o Copiar, y si querés activá slow motion y prefijos.
+3. Elegí dónde guardarlos (por defecto, en la misma carpeta),
+   revisá la lista y tocá el botón.
+
+Más info: https://betoviedo.com/Tools/Organizador_Footage/
+¿Te ahorró tiempo? https://cafecito.app/beto_oviedo
