@@ -99,6 +99,41 @@ jobs:
           Write-Host "OK: Mover y Deshacer funcionan"
           Stop-Process -Id $p.Id
 
+      - name: Probar el clic derecho (Enviar a)
+        shell: powershell
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          function captura($nombre) {
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("$nombre.png")
+          }
+          $exe = (Resolve-Path out/OrganizadorFootage.exe).Path
+          $lnk = Join-Path ([Environment]::GetFolderPath("SendTo")) "Organizador de Footage.lnk"
+
+          Start-Process $exe -ArgumentList "/agregar-enviar-a" -Wait
+          if (-not (Test-Path $lnk)) { throw "No se creo el acceso en Enviar a" }
+          $destino = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk).TargetPath
+          Write-Host "Acceso creado: $lnk -> $destino"
+          if ($destino -ne $exe) { throw "El acceso apunta a otro lado: $destino" }
+
+          # Lo mismo que hace Windows al usar Enviar a: abre el acceso con la carpeta como argumento
+          $p = Start-Process $lnk -ArgumentList "`"$env:RUNNER_TEMP\clips`"" -PassThru
+          Start-Sleep -Seconds 8
+          captura "4-abierta-desde-enviar-a"
+          Get-Process OrganizadorFootage -ErrorAction SilentlyContinue | Stop-Process
+          Start-Sleep -Seconds 2
+
+          $p = Start-Process $exe -PassThru
+          Start-Sleep -Seconds 5
+          captura "5-inicio-con-enviar-a"
+          Stop-Process -Id $p.Id
+
+          Start-Process $exe -ArgumentList "/quitar-enviar-a" -Wait
+          if (Test-Path $lnk) { throw "No se quito el acceso" }
+          Write-Host "OK: Enviar a se agrega, abre la carpeta y se quita"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

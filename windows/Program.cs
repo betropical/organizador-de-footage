@@ -256,7 +256,7 @@ namespace OrganizadorFootage
             lnkEnviarA = new LinkLabel
             {
                 AutoSize = true, Anchor = AnchorStyles.None, Margin = new Padding(0, 14, 0, 0),
-                LinkColor = ColorH, ActiveLinkColor = ColorH, LinkBehavior = LinkBehavior.HoverUnderline
+                Font = new Font("Segoe UI Symbol", 9.75f), LinkColor = ColorH, ActiveLinkColor = ColorH, LinkBehavior = LinkBehavior.HoverUnderline
             };
             lnkEnviarA.LinkClicked += (s, e) => AlternarEnviarA();
             centro.Controls.Add(lnkEnviarA);
@@ -491,7 +491,7 @@ namespace OrganizadorFootage
         {
             lnkEnviarA.Text = EnviarA.Existe
                 ? "✓ Está en el clic derecho (Enviar a)  ·  Quitar"
-                : "＋ Agregar al clic derecho de las carpetas (Enviar a)";
+                : "+ Agregar al clic derecho de las carpetas (Enviar a)";
         }
 
         void AlternarEnviarA()
