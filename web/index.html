@@ -88,6 +88,14 @@
         .beta-tag{color:var(--muted);font-weight:400}
         .win-intro{font-size:.88rem;color:#ccc;line-height:1.5;margin:0 0 14px}
         .win-intro a,.a-inst .note a{color:#ddd}
+        .extra{margin:22px 0 0;padding-top:18px;border-top:1px solid #333}
+        .extra summary{cursor:pointer;color:#ccc;font-weight:600;font-size:.9rem;list-style:none;display:flex;align-items:center;gap:8px}
+        .extra summary::-webkit-details-marker{display:none}
+        .extra summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+        .extra[open] summary::before{transform:rotate(90deg)}
+        .extra summary:hover{color:#fff}
+        .extra[open] summary{margin-bottom:14px}
+        .extra a{color:#ddd}
         .inst-title{margin:0 0 18px;font-size:1.2rem;letter-spacing:-.3px;padding-bottom:14px;border-bottom:1px solid var(--border)}
         code{display:block;background:#000;color:#00ff41;padding:10px;border-radius:6px;font-family:Menlo,Consolas,monospace;font-size:.72rem;margin-top:6px;word-break:break-all;user-select:all}
 
@@ -176,6 +184,17 @@
         </ol>
         <p class="note">¿Mac más vieja (macOS 14 o anterior)? Es más fácil: <b>clic derecho sobre la app → Abrir → Abrir</b>.</p>
     </div>
+
+    <details class="extra">
+        <summary>¿Preferís usarlo desde el clic derecho del Finder?</summary>
+        <p class="win-intro">También está como <b>Acción Rápida</b>: hacés clic derecho sobre una carpeta → <b>Acciones rápidas → Organizar Footage</b>, sin abrir ninguna app. Te pregunta las opciones con ventanitas y te muestra cuántos clips va a mover antes de hacerlo.</p>
+        <ol class="pasos">
+            <li><b>Instalá ExifTool</b> (gratis, la Acción Rápida lo necesita para leer los clips): en <a href="https://exiftool.org" target="_blank" rel="noopener">exiftool.org</a> descargá el <b>"MacOS Package"</b> y abrilo.</li>
+            <li><a href="OrganizarFootage-AccionRapida.zip" download><b>Descargá la Acción Rápida</b></a>, abrí el ZIP y hacé doble clic en <b>Organizar Footage.workflow</b> → <b>Instalar</b>.</li>
+            <li><b>Usala:</b> clic derecho sobre la carpeta con tus clips → <b>Acciones rápidas</b> → <b>Organizar Footage</b>.</li>
+        </ol>
+        <p class="note">Diferencias con la app: no tiene vista previa ni botón Deshacer, y guarda siempre dentro de la misma carpeta. Si dudás, usá la app.</p>
+    </details>
     </div>
 
     <div class="os-panel" id="os-win" hidden>

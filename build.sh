@@ -90,7 +90,7 @@ rm -rf "$DIST/.zip"
 (cd "$DIST" && ditto -c -k --keepParent "Organizar Footage.workflow" "OrganizarFootage-AccionRapida.zip")
 cp organizar.sh "$DIST/"
 # web/ queda listo para subir tal cual al servidor
-cp "$DIST/OrganizadorFootage-App.zip" web/
+cp "$DIST/OrganizadorFootage-App.zip" "$DIST/OrganizarFootage-AccionRapida.zip" web/
 
 echo "✅ Listo en v2/$DIST"
 ls -1 "$DIST"

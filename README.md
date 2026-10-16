@@ -40,6 +40,8 @@ curl -fsSL https://betoviedo.com/Tools/Organizador_Footage/OrganizadorFootage-Ap
 
 **Opción 2 — ZIP:** descargalo desde la [página](https://betoviedo.com/Tools/Organizador_Footage/), arrastrá la app a Aplicaciones y la primera vez andá a **Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente**. El aviso aparece porque la app no está firmada con una cuenta paga de Apple Developer.
 
+**Opción 3 — Acción Rápida del Finder:** para usarlo con clic derecho sobre una carpeta → **Acciones rápidas → Organizar Footage**, sin abrir la app. Requiere [ExifTool](https://exiftool.org) ("MacOS Package"). Descargá [`OrganizarFootage-AccionRapida.zip`](https://github.com/betropical/organizador-de-footage/releases/latest/download/OrganizarFootage-AccionRapida.zip), abrilo y hacé doble clic en `Organizar Footage.workflow` → **Instalar**. No tiene vista previa ni Deshacer, y guarda en la misma carpeta.
+
 ## Instalar en Windows (beta)
 
 Requiere Windows 10 u 11. No necesita instalar nada.
