@@ -21,11 +21,66 @@ namespace OrganizadorFootage
         [STAThread]
         static void Main(string[] args)
         {
+            // Para instalaciones automáticas: agrega / quita el acceso de "Enviar a" y sale
+            if (args.Length > 0 && args[0] == "/agregar-enviar-a") { EnviarA.Agregar(); return; }
+            if (args.Length > 0 && args[0] == "/quitar-enviar-a") { EnviarA.Quitar(); return; }
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             var form = new Ventana();
-            if (args.Length > 0 && Directory.Exists(args[0])) form.Shown += (s, e) => form.Abrir(args[0]);
+            // Desde "Enviar a" llega la carpeta elegida (si mandan un archivo, se usa su carpeta)
+            string ruta = args.Length > 0 ? args[0] : null;
+            if (ruta != null && File.Exists(ruta)) ruta = Path.GetDirectoryName(ruta);
+            if (ruta != null && Directory.Exists(ruta)) form.Shown += (s, e) => form.Abrir(ruta);
             Application.Run(form);
+        }
+    }
+
+    // ------------------------------------------------------------------ Menú "Enviar a"
+
+    /// Acceso directo en la carpeta "Enviar a" de Windows: clic derecho sobre una carpeta →
+    /// Enviar a → Organizador de Footage abre la app con esa carpeta cargada.
+    static class EnviarA
+    {
+        static string Acceso
+        {
+            get { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SendTo), "Organizador de Footage.lnk"); }
+        }
+
+        public static bool Existe { get { return File.Exists(Acceso); } }
+
+        /// El .exe se está ejecutando desde una carpeta temporal (por ejemplo, adentro del ZIP sin descomprimir)
+        public static bool DesdeTemporal
+        {
+            get
+            {
+                string exe = Application.ExecutablePath, tmp = Path.GetTempPath();
+                return exe.StartsWith(tmp, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        public static void Agregar()
+        {
+            var tipo = Type.GetTypeFromProgID("WScript.Shell");
+            object shell = Activator.CreateInstance(tipo);
+            try
+            {
+                object lnk = tipo.InvokeMember("CreateShortcut", System.Reflection.BindingFlags.InvokeMethod, null, shell, new object[] { Acceso });
+                var t = lnk.GetType();
+                Action<string, object> poner = (prop, val) => t.InvokeMember(prop, System.Reflection.BindingFlags.SetProperty, null, lnk, new[] { val });
+                poner("TargetPath", Application.ExecutablePath);
+                poner("WorkingDirectory", Path.GetDirectoryName(Application.ExecutablePath));
+                poner("IconLocation", Application.ExecutablePath + ",0");
+                poner("Description", "Separar clips en verticales y horizontales");
+                t.InvokeMember("Save", System.Reflection.BindingFlags.InvokeMethod, null, lnk, null);
+                Marshal.FinalReleaseComObject(lnk);
+            }
+            finally { Marshal.FinalReleaseComObject(shell); }
+        }
+
+        public static void Quitar()
+        {
+            if (File.Exists(Acceso)) File.Delete(Acceso);
         }
     }
 
@@ -105,6 +160,7 @@ namespace OrganizadorFootage
         Panel bienvenida, principal;
         ListView lista;
         Label lblCarpetaRuta, lblEjV, lblEjH;
+        LinkLabel lnkEnviarA;
         Button btnDeshacer;
         List<Movimiento> hechos = new List<Movimiento>();
         List<string> carpetasCreadas = new List<string>();
@@ -197,6 +253,14 @@ namespace OrganizadorFootage
             btn.Anchor = AnchorStyles.None;
             btn.Click += (s, e) => ElegirCarpeta();
             centro.Controls.Add(btn);
+            lnkEnviarA = new LinkLabel
+            {
+                AutoSize = true, Anchor = AnchorStyles.None, Margin = new Padding(0, 14, 0, 0),
+                LinkColor = ColorH, ActiveLinkColor = ColorH, LinkBehavior = LinkBehavior.HoverUnderline
+            };
+            lnkEnviarA.LinkClicked += (s, e) => AlternarEnviarA();
+            centro.Controls.Add(lnkEnviarA);
+            ActualizarEnviarA();
             lblError = new Label { ForeColor = Color.Firebrick, AutoSize = true, Anchor = AnchorStyles.None, Margin = new Padding(0, 12, 0, 0) };
             centro.Controls.Add(lblError);
 
@@ -419,6 +483,49 @@ namespace OrganizadorFootage
         static void Pista(TextBox t, string texto)
         {
             t.HandleCreated += (s, e) => SendMessage(t.Handle, 0x1501 /* EM_SETCUEBANNER */, (IntPtr)1, texto);
+        }
+
+        // ---------------------------------------------------------- Clic derecho ("Enviar a")
+
+        void ActualizarEnviarA()
+        {
+            lnkEnviarA.Text = EnviarA.Existe
+                ? "✓ Está en el clic derecho (Enviar a)  ·  Quitar"
+                : "＋ Agregar al clic derecho de las carpetas (Enviar a)";
+        }
+
+        void AlternarEnviarA()
+        {
+            try
+            {
+                if (EnviarA.Existe)
+                {
+                    EnviarA.Quitar();
+                    MessageBox.Show(this, "Listo, se quitó del menú \"Enviar a\".", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    if (EnviarA.DesdeTemporal)
+                    {
+                        MessageBox.Show(this, "Parece que estás abriendo la app desde adentro del ZIP.\n\n" +
+                            "Primero descomprimilo (clic derecho → Extraer todo), guardá OrganizadorFootage.exe " +
+                            "en una carpeta fija (por ejemplo Documentos) y abrilo desde ahí.", Text,
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    EnviarA.Agregar();
+                    MessageBox.Show(this, "¡Listo! Ahora podés hacer clic derecho sobre una carpeta →\n" +
+                        "Enviar a → Organizador de Footage.\n\n" +
+                        "En Windows 11, \"Enviar a\" está dentro de \"Mostrar más opciones\".\n\n" +
+                        "Si después movés OrganizadorFootage.exe a otra carpeta, volvé a agregarlo desde acá.",
+                        Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "No se pudo cambiar el menú \"Enviar a\":\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            ActualizarEnviarA();
         }
 
         // ---------------------------------------------------------- Arrastrar y soltar
