@@ -8,7 +8,7 @@
     <RootNamespace>OrganizadorFootage</RootNamespace>
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
     <Product>Organizador de Footage</Product>
     <AssemblyTitle>Organizador de Footage</AssemblyTitle>
     <Company>@betoviedo</Company>

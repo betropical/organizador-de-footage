@@ -50,6 +50,8 @@ Requiere Windows 10 u 11. No necesita instalar nada.
 2. Doble clic en `OrganizadorFootage.exe`.
 3. Si aparece **"Windows protegió tu PC"**: **Más información → Ejecutar de todas formas**. Aparece porque la app no está firmada con un certificado pago.
 
+**Clic derecho (opcional):** guardá el `.exe` en una carpeta fija, abrilo y tocá **"+ Agregar al clic derecho"**. Después: clic derecho sobre una carpeta → **Enviar a → Organizador de Footage** (en Windows 11, dentro de "Mostrar más opciones"). También se puede hacer con `OrganizadorFootage.exe /agregar-enviar-a` (y `/quitar-enviar-a`).
+
 Es una beta: probala primero con **Copiar**. Si algo falla, contalo en [Issues](https://github.com/betropical/organizador-de-footage/issues).
 
 ## ¿Es segura?
