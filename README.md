@@ -62,7 +62,7 @@ Todo el código está acá: [`App/OrganizadorFootage.swift`](App/OrganizadorFoot
 - No se conecta a internet ni junta datos.
 - En Mac lee la orientación y los fps con AVFoundation; solo para formatos que macOS no abre (Canon CRM, Nikon NEV) usa [ExifTool](https://exiftool.org) si lo tenés instalado.
 - En Windows usa su propio lector de MP4 / MOV ([`windows/Mp4Info.cs`](windows/Mp4Info.cs)), sin dependencias.
-- Análisis en VirusTotal: [Mac 0/64](https://www.virustotal.com/gui/file/da99a89b59838a4ac65cc9c30d35f48d021aad4359b4cec6657b085162d2f786) · [Windows 3/70](https://www.virustotal.com/gui/file/972de226b150746c6f1ae12c731fc9af44161ca10c4a0d4256bc261c10a00f10) (3 alertas genéricas de "machine learning" en antivirus menores, por ser una app nueva y sin firma).
+- Análisis en VirusTotal: [Mac 0/64](https://www.virustotal.com/gui/file/da99a89b59838a4ac65cc9c30d35f48d021aad4359b4cec6657b085162d2f786) · [Windows 3/67](https://www.virustotal.com/gui/file/a73afb8152b3f30fef593d86cbbacf25560bb8ab00691ec45eaa77a59b588a0d) (3 alertas genéricas de "machine learning" en antivirus menores, por ser una app nueva y sin firma).
 
 ## Compilar
 
