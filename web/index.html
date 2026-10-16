@@ -88,12 +88,13 @@
         .beta-tag{color:var(--muted);font-weight:400}
         .win-intro{font-size:.88rem;color:#ccc;line-height:1.5;margin:0 0 14px}
         .win-intro a,.a-inst .note a{color:#ddd}
-        .extra{margin:22px 0 0;padding-top:18px;border-top:1px solid #333}
-        .extra summary{cursor:pointer;color:#ccc;font-weight:600;font-size:.9rem;list-style:none;display:flex;align-items:center;gap:8px}
+        .extra{margin:22px 0 0}
+        .extra summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(76,175,80,.55);background:rgba(76,175,80,.12);border-radius:10px;color:#7ed483;font-weight:700;font-size:.92rem;transition:.2s}
         .extra summary::-webkit-details-marker{display:none}
-        .extra summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+        .extra summary::before{content:"▸";color:#4CAF50;font-size:.85rem;transition:transform .15s}
+        .extra summary::after{content:"Acción Rápida";margin-left:auto;background:#4CAF50;color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.3px;text-transform:uppercase;padding:2px 8px;border-radius:10px;white-space:nowrap;flex:none}
         .extra[open] summary::before{transform:rotate(90deg)}
-        .extra summary:hover{color:#fff}
+        .extra summary:hover{background:rgba(76,175,80,.2);border-color:#4CAF50;color:#a5e3a8}
         .extra[open] summary{margin-bottom:14px}
         .extra a{color:#ddd}
         .inst-title{margin:0 0 18px;font-size:1.2rem;letter-spacing:-.3px;padding-bottom:14px;border-bottom:1px solid var(--border)}
