@@ -89,8 +89,8 @@ ditto -c -k --norsrc --noextattr "$DIST/.zip" "$DIST/OrganizadorFootage-App.zip"
 rm -rf "$DIST/.zip"
 (cd "$DIST" && ditto -c -k --keepParent "Organizar Footage.workflow" "OrganizarFootage-AccionRapida.zip")
 cp organizar.sh "$DIST/"
-# web/ queda listo para subir tal cual al servidor
-cp "$DIST/OrganizadorFootage-App.zip" "$DIST/OrganizarFootage-AccionRapida.zip" web/
+# Si existe web/ (solo en la Mac de @betoviedo), deja los ZIPs listos para subir al servidor
+if [ -d web ]; then cp "$DIST/OrganizadorFootage-App.zip" "$DIST/OrganizarFootage-AccionRapida.zip" web/; fi
 
 echo "✅ Listo en v2/$DIST"
 ls -1 "$DIST"
