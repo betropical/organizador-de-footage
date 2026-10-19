@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,6 +26,8 @@ namespace OrganizadorFootage
             // Para instalaciones automáticas: agrega / quita el acceso de "Enviar a" y sale
             if (args.Length > 0 && args[0] == "/agregar-enviar-a") { EnviarA.Agregar(); return; }
             if (args.Length > 0 && args[0] == "/quitar-enviar-a") { EnviarA.Quitar(); return; }
+            if (args.Length > 0 && args[0] == "/instalar-panel-premiere") { PanelPremiere.Instalar(); return; }
+            if (args.Length > 0 && args[0] == "/quitar-panel-premiere") { PanelPremiere.Quitar(); return; }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -81,6 +85,85 @@ namespace OrganizadorFootage
         public static void Quitar()
         {
             if (File.Exists(Acceso)) File.Delete(Acceso);
+        }
+    }
+
+    // ------------------------------------------------------------------ Panel de Premiere
+
+    /// El panel firmado viaja adentro del .exe (recurso PanelPremiere.zip) y se descomprime en la
+    /// carpeta de extensiones de Adobe del usuario. No necesita permisos de administrador ni internet.
+    static class PanelPremiere
+    {
+        public enum Estado { NoIncluido, NoInstalado, Desactualizado, Instalado }
+
+        const string Id = "com.betoviedo.organizadorfootage";
+
+        static string Extensiones
+        {
+            get { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Adobe", "CEP", "extensions"); }
+        }
+
+        static string Destino { get { return Path.Combine(Extensiones, Id); } }
+
+        static Stream Zip() { return typeof(PanelPremiere).Assembly.GetManifestResourceStream("PanelPremiere.zip"); }
+
+        /// Versión del panel según su manifest (ExtensionBundleVersion)
+        static Version LeerVersion(string xml)
+        {
+            var m = Regex.Match(xml ?? "", "ExtensionBundleVersion=\"([^\"]+)\"");
+            Version v;
+            return m.Success && Version.TryParse(m.Groups[1].Value, out v) ? v : null;
+        }
+
+        static Version Incluida()
+        {
+            using (var s = Zip())
+            {
+                if (s == null) return null;
+                using (var z = new ZipArchive(s))
+                {
+                    var e = z.GetEntry(Id + "/CSXS/manifest.xml");
+                    if (e == null) return null;
+                    using (var r = new StreamReader(e.Open())) return LeerVersion(r.ReadToEnd());
+                }
+            }
+        }
+
+        static Version Instalada()
+        {
+            string f = Path.Combine(Destino, "CSXS", "manifest.xml");
+            return File.Exists(f) ? LeerVersion(File.ReadAllText(f)) : null;
+        }
+
+        public static Estado EstadoActual
+        {
+            get
+            {
+                var incluida = Incluida();
+                if (incluida == null) return Estado.NoIncluido;
+                var instalada = Instalada();
+                if (instalada == null) return Estado.NoInstalado;
+                return instalada < incluida ? Estado.Desactualizado : Estado.Instalado;
+            }
+        }
+
+        public static void Instalar()
+        {
+            using (var s = Zip())
+            {
+                if (s == null) return;
+                using (var z = new ZipArchive(s))
+                {
+                    Quitar();
+                    Directory.CreateDirectory(Extensiones);
+                    z.ExtractToDirectory(Extensiones);
+                }
+            }
+        }
+
+        public static void Quitar()
+        {
+            if (Directory.Exists(Destino)) Directory.Delete(Destino, true);
         }
     }
 
@@ -160,7 +243,7 @@ namespace OrganizadorFootage
         Panel bienvenida, principal;
         ListView lista;
         Label lblCarpetaRuta, lblEjV, lblEjH;
-        LinkLabel lnkEnviarA;
+        LinkLabel lnkEnviarA, lnkPremiere;
         Button btnDeshacer;
         List<Movimiento> hechos = new List<Movimiento>();
         List<string> carpetasCreadas = new List<string>();
@@ -261,6 +344,14 @@ namespace OrganizadorFootage
             lnkEnviarA.LinkClicked += (s, e) => AlternarEnviarA();
             centro.Controls.Add(lnkEnviarA);
             ActualizarEnviarA();
+            lnkPremiere = new LinkLabel
+            {
+                AutoSize = true, Anchor = AnchorStyles.None, Margin = new Padding(0, 6, 0, 0),
+                Font = new Font("Segoe UI Symbol", 9.75f), LinkColor = ColorH, ActiveLinkColor = ColorH, LinkBehavior = LinkBehavior.HoverUnderline
+            };
+            lnkPremiere.LinkClicked += (s, e) => AlternarPremiere();
+            centro.Controls.Add(lnkPremiere);
+            ActualizarPremiere();
             lblError = new Label { ForeColor = Color.Firebrick, AutoSize = true, Anchor = AnchorStyles.None, Margin = new Padding(0, 12, 0, 0) };
             centro.Controls.Add(lblError);
 
@@ -526,6 +617,44 @@ namespace OrganizadorFootage
                 MessageBox.Show(this, "No se pudo cambiar el menú \"Enviar a\":\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             ActualizarEnviarA();
+        }
+
+        // ---------------------------------------------------------- Panel de Premiere
+
+        void ActualizarPremiere()
+        {
+            var estado = PanelPremiere.EstadoActual;
+            lnkPremiere.Visible = estado != PanelPremiere.Estado.NoIncluido;
+            lnkPremiere.Text =
+                estado == PanelPremiere.Estado.Instalado ? "✓ Panel de Premiere instalado  ·  Quitar" :
+                estado == PanelPremiere.Estado.Desactualizado ? "↑ Actualizar el panel de Premiere Pro" :
+                "+ Instalar panel para Premiere Pro";
+        }
+
+        void AlternarPremiere()
+        {
+            try
+            {
+                if (PanelPremiere.EstadoActual == PanelPremiere.Estado.Instalado)
+                {
+                    PanelPremiere.Quitar();
+                    MessageBox.Show(this, "Se quitó el panel de Premiere. Desaparece la próxima vez que abras Premiere.",
+                        Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    PanelPremiere.Instalar();
+                    MessageBox.Show(this, "¡Listo! Reiniciá Premiere Pro y abrí el panel desde\n" +
+                        "Ventana → Extensiones → Organizador de Footage.\n\n" +
+                        "Sirve para ordenar en bins los clips del proyecto, o importar una carpeta ya dividida en verticales y horizontales.",
+                        Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "No se pudo instalar el panel de Premiere:\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            ActualizarPremiere();
         }
 
         // ---------------------------------------------------------- Arrastrar y soltar

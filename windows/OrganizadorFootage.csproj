@@ -8,7 +8,7 @@
     <RootNamespace>OrganizadorFootage</RootNamespace>
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>2.2.0</Version>
+    <Version>2.3.0</Version>
     <Product>Organizador de Footage</Product>
     <AssemblyTitle>Organizador de Footage</AssemblyTitle>
     <Company>@betoviedo</Company>
@@ -21,6 +21,10 @@
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <!-- Panel de Premiere firmado (lo genera build-premiere.sh en la Mac) -->
+    <EmbeddedResource Include="PanelPremiere.zip" LogicalName="PanelPremiere.zip" />
     <!-- Permite compilar también desde Mac / Linux -->
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
   </ItemGroup>

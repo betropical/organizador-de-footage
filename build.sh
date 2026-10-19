@@ -6,11 +6,15 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-VERSION="2.1.1"
+VERSION="2.3.0"
 DIST="dist"
 APP="$DIST/Organizador de Footage.app"
 WF="$DIST/Organizar Footage.workflow"
 rm -rf "$DIST"; mkdir -p "$DIST"
+
+# ---------- Panel de Premiere (firmado) ----------
+# Va adentro de la app para el botón "Instalar panel para Premiere Pro"
+./build-premiere.sh
 
 # ---------- App ----------
 echo "▸ Compilando app (Apple Silicon + Intel)…"
@@ -23,6 +27,8 @@ done
 lipo -create "$DIST/.build/app-arm64" "$DIST/.build/app-x86_64" -output "$APP/Contents/MacOS/OrganizadorFootage"
 rm -rf "$DIST/.build"
 cp App/AppIcon.icns "$APP/Contents/Resources/"
+mkdir -p "$APP/Contents/Resources/PanelPremiere"
+ditto -x -k "$DIST/OrganizadorFootage-Premiere.zip" "$APP/Contents/Resources/PanelPremiere"
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>

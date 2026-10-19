@@ -16,6 +16,54 @@ let linkCafecito = URL(string: "https://cafecito.app/beto_oviedo")!
 let linkInstagram = URL(string: "https://www.instagram.com/betoviedo/")!
 let linkGitHub = URL(string: "https://github.com/betropical/organizador-de-footage")!
 
+// MARK: - Panel de Premiere
+
+/// El panel firmado viaja adentro de la app (Resources/PanelPremiere) y se copia a la carpeta
+/// de extensiones de Adobe del usuario. No necesita permisos de administrador ni internet.
+enum PanelPremiere {
+    enum Estado { case noIncluido, noInstalado, desactualizado, instalado }
+
+    static let id = "com.betoviedo.organizadorfootage"
+
+    static var origen: URL? {
+        guard let u = Bundle.main.resourceURL?.appendingPathComponent("PanelPremiere/\(id)"),
+              FileManager.default.fileExists(atPath: u.path) else { return nil }
+        return u
+    }
+
+    static var destino: URL {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/Adobe/CEP/extensions/\(id)")
+    }
+
+    /// Versión del panel según su manifest (ExtensionBundleVersion)
+    static func version(_ carpeta: URL) -> String? {
+        guard let xml = try? String(contentsOf: carpeta.appendingPathComponent("CSXS/manifest.xml"), encoding: .utf8),
+              let r = xml.range(of: #"ExtensionBundleVersion="([^"]+)""#, options: .regularExpression) else { return nil }
+        return String(xml[r].dropFirst("ExtensionBundleVersion=\"".count).dropLast())
+    }
+
+    static var estado: Estado {
+        guard let origen else { return .noIncluido }
+        guard let instalada = version(destino) else { return .noInstalado }
+        let incluida = version(origen) ?? ""
+        return instalada.compare(incluida, options: .numeric) == .orderedAscending ? .desactualizado : .instalado
+    }
+
+    static func instalar() throws {
+        guard let origen else { return }
+        let fm = FileManager.default
+        try fm.createDirectory(at: destino.deletingLastPathComponent(), withIntermediateDirectories: true)
+        quitar()
+        try fm.copyItem(at: origen, to: destino)
+    }
+
+    /// También borra un enlace simbólico (instalación de desarrollo)
+    static func quitar() {
+        try? FileManager.default.removeItem(at: destino)
+    }
+}
+
 // MARK: - Modelo
 
 struct Clip: Identifiable {
@@ -462,6 +510,7 @@ struct ZonaSoltar: View {
                 .controlSize(.large)
                 .keyboardShortcut("o")
             if let e = org.error { Text(e).foregroundStyle(.red) }
+            EnlacePanelPremiere().padding(.top, 6)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
@@ -470,6 +519,48 @@ struct ZonaSoltar: View {
                 .foregroundStyle(arrastrando ? Color.accentColor : Color.secondary.opacity(0.4))
                 .padding(20)
         )
+    }
+}
+
+/// "+ Instalar panel para Premiere Pro" / "✓ Panel de Premiere instalado · Quitar"
+struct EnlacePanelPremiere: View {
+    @State private var estado = PanelPremiere.estado
+    @State private var aviso: (titulo: String, texto: String)?
+
+    var body: some View {
+        if estado != .noIncluido {
+            Button(texto) { alternar() }
+                .buttonStyle(.link)
+                .alert(aviso?.titulo ?? "", isPresented: Binding(get: { aviso != nil }, set: { if !$0 { aviso = nil } })) {
+                    Button("OK") { aviso = nil }
+                } message: {
+                    Text(aviso?.texto ?? "")
+                }
+        }
+    }
+
+    var texto: String {
+        switch estado {
+        case .instalado: return "✓ Panel de Premiere instalado  ·  Quitar"
+        case .desactualizado: return "↑ Actualizar el panel de Premiere Pro"
+        default: return "+ Instalar panel para Premiere Pro"
+        }
+    }
+
+    func alternar() {
+        if estado == .instalado {
+            PanelPremiere.quitar()
+            aviso = ("Panel quitado", "Se quitó el panel de Premiere. Desaparece la próxima vez que abras Premiere.")
+        } else {
+            do {
+                try PanelPremiere.instalar()
+                aviso = ("¡Listo!", "Reiniciá Premiere Pro y abrí el panel desde\nVentana → Extensiones → Organizador de Footage.\n\n" +
+                         "Sirve para ordenar en bins los clips del proyecto, o importar una carpeta ya dividida en verticales y horizontales.")
+            } catch {
+                aviso = ("No se pudo instalar el panel", error.localizedDescription)
+            }
+        }
+        estado = PanelPremiere.estado
     }
 }
 

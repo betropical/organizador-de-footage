@@ -134,6 +134,26 @@ jobs:
           if (Test-Path $lnk) { throw "No se quito el acceso" }
           Write-Host "OK: Enviar a se agrega, abre la carpeta y se quita"
 
+      - name: Probar la instalación del panel de Premiere
+        shell: powershell
+        run: |
+          $exe = (Resolve-Path out/OrganizadorFootage.exe).Path
+          $panel = "$env:APPDATA\Adobe\CEP\extensions\com.betoviedo.organizadorfootage"
+
+          Start-Process $exe -ArgumentList "/instalar-panel-premiere" -Wait
+          foreach ($f in "CSXS\manifest.xml", "META-INF\signatures.xml", "index.html", "jsx\host.jsx", "js\panel.js") {
+            if (-not (Test-Path "$panel\$f")) { throw "Falta $f en el panel instalado" }
+          }
+          Write-Host "Panel instalado en $panel"
+
+          # Reinstalar encima no tiene que fallar (actualización)
+          Start-Process $exe -ArgumentList "/instalar-panel-premiere" -Wait
+          if (-not (Test-Path "$panel\CSXS\manifest.xml")) { throw "Reinstalar rompió el panel" }
+
+          Start-Process $exe -ArgumentList "/quitar-panel-premiere" -Wait
+          if (Test-Path $panel) { throw "No se quitó el panel" }
+          Write-Host "OK: el panel de Premiere se instala, se reinstala y se quita"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

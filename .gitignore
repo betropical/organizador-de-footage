@@ -23,3 +23,9 @@
 !docs/
 !docs/captura-windows.png
 !docs/captura-mac.png
+!build-premiere.sh
+!windows/PanelPremiere.zip
+# Panel de Premiere (el certificado y la herramienta de firma quedan afuera: certificado/, herramientas/)
+!premiere/
+!premiere/**
+premiere/**/.DS_Store

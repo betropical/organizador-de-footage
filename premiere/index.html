@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Organizador de Footage</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <nav class="pestanas">
+    <button data-modo="proyecto" class="activa">Proyecto</button>
+    <button data-modo="carpeta">Carpeta</button>
+  </nav>
+
+  <section class="opciones">
+    <label class="fila"><input type="checkbox" id="slowmo"> Separar SlowMo / RealTime</label>
+    <label class="fila sub" id="filaUmbral">Más de <input type="number" id="umbral" min="24" max="240" step="5"> fps</label>
+    <div class="prefijos">
+      <label><span class="icono v"></span>Verticales<input type="text" id="prefijoV" placeholder="Prefijo (ej: Reels_)"></label>
+      <label><span class="icono h"></span>Horizontales<input type="text" id="prefijoH" placeholder="Prefijo (ej: YouTube_)"></label>
+    </div>
+    <label class="fila"><input type="checkbox" id="secuencias"> Crear una secuencia por grupo</label>
+  </section>
+
+  <!-- Modo Proyecto: ordena en bins lo que ya está importado -->
+  <section class="modo" id="modo-proyecto">
+    <p class="ayuda">Ordena en bins los clips que ya están en el proyecto. No toca los archivos del disco.</p>
+    <button class="primario" id="analizarProyecto">Analizar proyecto</button>
+  </section>
+
+  <!-- Modo Carpeta: organiza en disco y después importa -->
+  <section class="modo oculto" id="modo-carpeta">
+    <div class="soltar" id="soltar">
+      <button id="elegirCarpeta">Elegir carpeta o tarjeta…</button>
+      <span class="ayuda">o arrastrala acá</span>
+      <div class="ruta" id="rutaCarpeta"></div>
+    </div>
+    <label class="fila"><input type="checkbox" id="subcarpetas"> Incluir subcarpetas</label>
+    <div class="aviso oculto" id="avisoBin">
+      <span id="avisoBinTexto"></span>
+      <label class="fila"><input type="radio" name="binExistente" value="agregar"> Agregar al bin existente</label>
+      <label class="fila"><input type="radio" name="binExistente" value="nuevo" checked> <span id="binNuevoTexto"></span></label>
+    </div>
+    <div class="grupo-opciones">
+      <label class="fila"><input type="radio" name="accion" value="importar" checked> Solo importar (divide en bins, no toca los archivos)</label>
+      <label class="fila"><input type="radio" name="accion" value="mover"> Mover en el disco</label>
+      <label class="fila"><input type="radio" name="accion" value="copiar"> Copiar en el disco (deja los originales)</label>
+    </div>
+    <div class="grupo-opciones" id="opcionesDisco">
+      <label class="fila"><input type="radio" name="destino" value="misma" checked> En la misma carpeta</label>
+      <label class="fila"><input type="radio" name="destino" value="otra"> En otra carpeta…</label>
+      <div class="ruta" id="rutaDestino"></div>
+      <label class="fila"><input type="checkbox" id="importar"> Importar al proyecto al terminar</label>
+    </div>
+  </section>
+
+  <section class="resultado oculto" id="resultado">
+    <div class="fichas" id="fichas"></div>
+    <p class="ayuda" id="nota"></p>
+    <ul class="lista" id="lista"></ul>
+  </section>
+
+  <div class="estado oculto" id="estado">
+    <span id="estadoTexto"></span>
+    <button id="deshacer" class="oculto">Deshacer</button>
+  </div>
+
+  <div class="barra">
+    <button class="primario" id="ejecutar" disabled>Procesar</button>
+    <span class="ayuda" id="resumenAccion"></span>
+  </div>
+
+  <footer>
+    <span>@betoviedo</span>
+    <a href="#" data-url="https://betoviedo.com/Tools/Organizador_Footage/">Ayuda</a>
+    <a href="#" data-url="https://cafecito.app/beto_oviedo">☕ Cafecito</a>
+  </footer>
+
+  <script src="js/mp4info.js"></script>
+  <script src="js/organizador.js"></script>
+  <script src="js/panel.js"></script>
+</body>
+</html>

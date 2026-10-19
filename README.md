@@ -54,6 +54,19 @@ Requiere Windows 10 u 11. No necesita instalar nada.
 
 Es una beta: probala primero con **Copiar**. Si algo falla, contalo en [Issues](https://github.com/betropical/organizador-de-footage/issues).
 
+## Panel para Premiere Pro
+
+Un panel dentro de Premiere (CC 2018 en adelante, Mac y Windows) con dos modos:
+
+- **Proyecto:** ordena en bins `Verticales` / `Horizontales` (y SlowMo) los clips que ya importaste. No toca los archivos.
+- **Carpeta:** importa una carpeta o tarjeta con todo mezclado y la deja dividida en bins. Saltea lo que ya está en el proyecto. También puede mover o copiar los archivos en el disco, como la app.
+
+Opcionalmente crea una secuencia por grupo. Todo se puede deshacer.
+
+**Instalar:** abrí la app (Mac o Windows) y tocá **"+ Instalar panel para Premiere Pro"**. Reiniciá Premiere y abrilo desde **Ventana → Extensiones → Organizador de Footage**. También se puede instalar el `.zxp` con [ZXP Installer](https://aescripts.com/learn/zxp-installer/).
+
+El código está en [`premiere/`](premiere/). Lee la orientación del archivo con su propio lector ([`premiere/js/mp4info.js`](premiere/js/mp4info.js)) y, si no puede, usa lo que informa Premiere.
+
 ## ¿Es segura?
 
 Todo el código está acá: [`App/OrganizadorFootage.swift`](App/OrganizadorFootage.swift) (Mac) y [`windows/`](windows/) (Windows). La app:
@@ -87,6 +100,15 @@ dotnet build windows/OrganizadorFootage.csproj -c Release
 ```
 
 Se puede compilar desde Mac, Linux o Windows. GitHub Actions ([`.github/workflows/windows.yml`](.github/workflows/windows.yml)) la compila en Windows, la abre con clips de prueba y adjunta el ZIP a cada versión publicada.
+
+### Panel de Premiere
+
+```bash
+./build-premiere.sh            # firma el panel → dist/OrganizadorFootage-Premiere.zxp / .zip
+premiere/instalar-dev.sh       # o instalar-dev.bat: instala sin firmar, para desarrollo
+```
+
+`build-premiere.sh` crea un certificado propio la primera vez y copia el panel firmado a `windows/PanelPremiere.zip`, que la app de Windows lleva adentro. `build.sh` lo mete en la app de Mac.
 
 ### Script de línea de comandos
 
