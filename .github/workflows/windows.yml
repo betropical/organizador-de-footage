@@ -35,6 +35,13 @@ jobs:
         run: |
           choco install ffmpeg -y --no-progress | Out-Null
           $env:Path += ";C:\ProgramData\chocolatey\bin"
+          # Si Chocolatey falla (pasa a veces), se baja ffmpeg directo de GitHub
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+            Write-Host "Chocolatey no instalo ffmpeg: se descarga de GitHub"
+            Invoke-WebRequest https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip -OutFile "$env:RUNNER_TEMP\ffmpeg.zip"
+            Expand-Archive "$env:RUNNER_TEMP\ffmpeg.zip" "$env:RUNNER_TEMP\ffmpeg" -Force
+            $env:Path += ";" + (Get-ChildItem "$env:RUNNER_TEMP\ffmpeg" -Recurse -Filter ffmpeg.exe | Select-Object -First 1).DirectoryName
+          }
           $d = "$env:RUNNER_TEMP\clips\PRIVATE\M4ROOT\CLIP"
           New-Item -ItemType Directory -Force $d | Out-Null
           function clip($out, $rot, $fps) {
